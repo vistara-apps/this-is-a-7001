@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-color: theme(colors.slate.200);
+  }
+  
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    background: linear-gradient(135deg, theme(colors.gradient-start), theme(colors.gradient-end));
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary to-accent;
+  }
+  
+  .card {
+    @apply bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg shadow-card;
+  }
+  
+  .btn-primary {
+    @apply bg-primary hover:bg-primary/90 text-white font-medium px-6 py-3 rounded-md transition-all duration-250 hover:shadow-lg active:scale-95;
+  }
+  
+  .btn-secondary {
+    @apply bg-white/10 hover:bg-white/20 text-white border border-white/20 font-medium px-6 py-3 rounded-md transition-all duration-250 backdrop-blur-sm;
+  }
+  
+  .input-field {
+    @apply w-full bg-white/10 border border-white/20 rounded-md px-4 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 backdrop-blur-sm transition-all duration-250;
+  }
+  
+  .textarea-field {
+    @apply w-full bg-white/10 border border-white/20 rounded-md px-4 py-3 text-white placeholder:text-white/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 backdrop-blur-sm transition-all duration-250 resize-none min-h-[120px];
+  }
+}
