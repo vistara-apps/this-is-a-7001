@@ -11,9 +11,12 @@ const toneOptions = [
   { value: 'friendly', label: 'Friendly' },
 ];
 
+const FREE_TIER_LIMIT = 3;
+
 export default function BioInputForm({ onGenerate }) {
   const { state, dispatch } = useApp();
   const { userInput } = state.bioProfile;
+  const { subscriptionStatus, usageCount } = state.user;
 
   const handleInputChange = (field, value) => {
     dispatch({
@@ -138,6 +141,30 @@ export default function BioInputForm({ onGenerate }) {
             />
           </div>
         </div>
+
+        {/* Usage indicator for free users */}
+        {subscriptionStatus === 'free' && (
+          <div className="card p-4 border-accent/50 bg-accent/10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-accent text-sm font-medium">
+                  Daily Usage: {usageCount}/{FREE_TIER_LIMIT}
+                </p>
+                <p className="text-white/60 text-xs">
+                  {FREE_TIER_LIMIT - usageCount} bio generations remaining today
+                </p>
+              </div>
+              {usageCount >= FREE_TIER_LIMIT && (
+                <button
+                  onClick={() => dispatch({ type: 'TOGGLE_UPGRADE_MODAL' })}
+                  className="text-xs btn-primary px-3 py-1"
+                >
+                  Upgrade
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {state.bioProfile.error && (
           <div className="card p-4 border-red-500/50 bg-red-500/10">

@@ -14,7 +14,9 @@
     "openai": "^4.20.1",
     "lucide-react": "^0.263.1",
     "@radix-ui/react-select": "^2.0.0",
-    "@radix-ui/react-dialog": "^1.0.5"
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@stripe/stripe-js": "^2.1.11",
+    "@stripe/react-stripe-js": "^2.4.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.28",
