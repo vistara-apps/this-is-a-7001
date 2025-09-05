@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
-import { Crown, X, Check, Sparkles, Key, RefreshCw } from 'lucide-react';
+import { Crown, X, Check, Sparkles, Key, RefreshCw, CreditCard } from 'lucide-react';
+import { createCheckoutSession, redirectToCheckout, PRICING } from '../services/stripe';
 
 const features = [
   {
@@ -22,6 +23,8 @@ const features = [
 
 export default function UpgradeModal() {
   const { state, dispatch } = useApp();
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [email, setEmail] = useState('');
 
   if (!state.ui.showUpgradeModal) return null;
 
@@ -29,10 +32,33 @@ export default function UpgradeModal() {
     dispatch({ type: 'TOGGLE_UPGRADE_MODAL' });
   };
 
-  const handleUpgrade = () => {
-    // Simulate successful upgrade for demo
-    dispatch({ type: 'UPGRADE_USER' });
-    alert('🎉 Welcome to Premium! You now have access to all advanced features.');
+  const handleUpgrade = async () => {
+    if (!email) {
+      alert('Please enter your email address');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const session = await createCheckoutSession(
+        PRICING.PREMIUM_MONTHLY.priceId,
+        email
+      );
+
+      if (session.sessionId === 'cs_demo_session_id') {
+        // Demo mode - simulate successful upgrade
+        dispatch({ type: 'UPGRADE_USER' });
+        alert('🎉 Welcome to Premium! You now have access to all advanced features.');
+      } else {
+        // Real Stripe checkout
+        await redirectToCheckout(session.sessionId);
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      alert('Failed to process upgrade. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -75,13 +101,37 @@ export default function UpgradeModal() {
           <p className="text-white/60 text-sm">Cancel anytime. No hidden fees.</p>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-white/80 mb-2">
+              Email Address
+            </label>
+            <input
+              type="email"
+              className="input-field"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
           <button
             onClick={handleUpgrade}
-            className="w-full btn-primary flex items-center justify-center gap-2 py-3"
+            disabled={isProcessing || !email}
+            className="w-full btn-primary flex items-center justify-center gap-2 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Crown className="h-4 w-4" />
-            Upgrade to Premium
+            {isProcessing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                Processing...
+              </>
+            ) : (
+              <>
+                <CreditCard className="h-4 w-4" />
+                Upgrade to Premium
+              </>
+            )}
           </button>
           <button
             onClick={handleClose}

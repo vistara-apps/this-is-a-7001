@@ -7,6 +7,8 @@ const initialState = {
     email: '',
     subscriptionStatus: 'free', // 'free' | 'premium'
     createdAt: null,
+    usageCount: 0, // Track bio generations for free users
+    lastResetDate: new Date().toDateString(), // Reset usage daily
   },
   bioProfile: {
     userInput: {
@@ -99,6 +101,28 @@ function appReducer(state, action) {
         },
         ui: { ...state.ui, currentStep: 'input' },
       };
+    case 'INCREMENT_USAGE':
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          usageCount: state.user.usageCount + 1,
+        },
+      };
+    case 'RESET_USAGE':
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          usageCount: 0,
+          lastResetDate: new Date().toDateString(),
+        },
+      };
+    case 'SET_USER_EMAIL':
+      return {
+        ...state,
+        user: { ...state.user, email: action.payload },
+      };
     default:
       return state;
   }
@@ -114,8 +138,24 @@ export function AppProvider({ children }) {
       try {
         const parsed = JSON.parse(savedData);
         dispatch({ type: 'UPDATE_USER_INPUT', payload: parsed.userInput || {} });
-        if (parsed.subscriptionStatus) {
+        if (parsed.subscriptionStatus === 'premium') {
           dispatch({ type: 'UPGRADE_USER' });
+        }
+        if (parsed.email) {
+          dispatch({ type: 'SET_USER_EMAIL', payload: parsed.email });
+        }
+        
+        // Check if usage should be reset (daily reset)
+        const today = new Date().toDateString();
+        if (parsed.lastResetDate !== today) {
+          dispatch({ type: 'RESET_USAGE' });
+        } else if (parsed.usageCount) {
+          dispatch({ type: 'INCREMENT_USAGE' });
+          // Decrement by 1 since we just incremented
+          dispatch({ type: 'INCREMENT_USAGE' });
+          for (let i = 1; i < parsed.usageCount; i++) {
+            dispatch({ type: 'INCREMENT_USAGE' });
+          }
         }
       } catch (error) {
         console.error('Error loading saved data:', error);
@@ -128,9 +168,18 @@ export function AppProvider({ children }) {
     const dataToSave = {
       userInput: state.bioProfile.userInput,
       subscriptionStatus: state.user.subscriptionStatus,
+      email: state.user.email,
+      usageCount: state.user.usageCount,
+      lastResetDate: state.user.lastResetDate,
     };
     localStorage.setItem('biocraftAI', JSON.stringify(dataToSave));
-  }, [state.bioProfile.userInput, state.user.subscriptionStatus]);
+  }, [
+    state.bioProfile.userInput, 
+    state.user.subscriptionStatus, 
+    state.user.email, 
+    state.user.usageCount, 
+    state.user.lastResetDate
+  ]);
 
   const value = {
     state,

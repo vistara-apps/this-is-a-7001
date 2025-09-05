@@ -1,0 +1,17 @@
+{
+  "status": "healthy",
+  "service": "BioCraft AI",
+  "version": "1.0.0",
+  "timestamp": "2024-01-15T10:30:00Z",
+  "environment": "production",
+  "features": {
+    "bioGeneration": true,
+    "keywordOptimization": true,
+    "stripeIntegration": true,
+    "demoMode": true
+  },
+  "dependencies": {
+    "openai": "available",
+    "stripe": "available"
+  }
+}
